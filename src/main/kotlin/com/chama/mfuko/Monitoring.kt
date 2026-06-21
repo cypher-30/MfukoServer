@@ -1,4 +1,4 @@
-package com.chama.com.chama.groupmoneymanager
+package com.chama.mfuko
 
 import io.ktor.server.application.*
 import io.ktor.server.plugins.calllogging.*

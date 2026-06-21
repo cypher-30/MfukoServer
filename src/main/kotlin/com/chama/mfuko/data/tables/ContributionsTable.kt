@@ -1,4 +1,4 @@
-package com.chama.groupmoneymanager.data.tables
+package com.chama.mfuko.data.tables
 
 import org.jetbrains.exposed.dao.id.LongIdTable
 import org.jetbrains.exposed.sql.javatime.datetime

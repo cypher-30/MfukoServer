@@ -1,4 +1,4 @@
-rootProject.name = "groupmoneymanager"
+rootProject.name = "mfuko-server"
 
 dependencyResolutionManagement {
     repositories {

@@ -1,11 +1,11 @@
-package com.chama.groupmoneymanager.plugins
+package com.chama.mfuko.plugins
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
-import com.chama.groupmoneymanager.data.requests.*
-import com.chama.groupmoneymanager.data.responses.*
-import com.chama.groupmoneymanager.data.tables.*
-import com.chama.groupmoneymanager.db.DatabaseFactory.dbQuery
+import com.chama.mfuko.data.requests.*
+import com.chama.mfuko.data.responses.*
+import com.chama.mfuko.data.tables.*
+import com.chama.mfuko.db.DatabaseFactory.dbQuery
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*

@@ -1,6 +1,6 @@
-package com.chama.groupmoneymanager.db
+package com.chama.mfuko.db
 
-import com.chama.groupmoneymanager.data.tables.*
+import com.chama.mfuko.data.tables.*
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import io.ktor.server.config.*

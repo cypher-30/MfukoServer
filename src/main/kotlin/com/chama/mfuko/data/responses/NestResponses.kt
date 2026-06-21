@@ -1,4 +1,4 @@
-package com.chama.groupmoneymanager.data.responses
+package com.chama.mfuko.data.responses
 
 import kotlinx.serialization.Serializable
 

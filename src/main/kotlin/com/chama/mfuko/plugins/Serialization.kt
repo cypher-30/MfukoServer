@@ -1,4 +1,4 @@
-package com.chama.groupmoneymanager.plugins
+package com.chama.mfuko.plugins
 
 import io.ktor.serialization.gson.*
 import io.ktor.server.application.*

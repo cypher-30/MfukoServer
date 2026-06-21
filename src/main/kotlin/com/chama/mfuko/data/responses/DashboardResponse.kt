@@ -1,4 +1,4 @@
-package com.chama.groupmoneymanager.data.responses
+package com.chama.mfuko.data.responses
 
 // Using "Dto" suffix to distinguish from potential future domain models
 data class ContributionStatusDto(

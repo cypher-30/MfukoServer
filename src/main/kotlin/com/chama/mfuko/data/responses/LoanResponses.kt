@@ -1,4 +1,4 @@
-package com.chama.groupmoneymanager.data.responses
+package com.chama.mfuko.data.responses
 
 // This is the original response for a new request
 data class LoanResponse(

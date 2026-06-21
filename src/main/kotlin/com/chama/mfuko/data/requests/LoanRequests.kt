@@ -1,4 +1,4 @@
-package com.chama.groupmoneymanager.data.requests
+package com.chama.mfuko.data.requests
 
 data class LoanRequestRequest(
     val nestId: Long,

@@ -1,4 +1,4 @@
-package com.chama.groupmoneymanager.data.requests
+package com.chama.mfuko.data.requests
 
 import kotlinx.serialization.Serializable
 

@@ -8,6 +8,7 @@ data class ContributionStatusDto(
 )
 
 data class LoanStatusDto(
+    val loanId: Long,
     val outstandingBalance: Double,
     val nextDueDate: String? // A loan might not have a next due date if fully paid
 )
@@ -20,5 +21,6 @@ data class PenaltyStatusDto(
 data class DashboardResponse(
     val contributionStatus: ContributionStatusDto?,
     val loanStatus: LoanStatusDto?,
-    val penaltyStatus: PenaltyStatusDto?
+    val penaltyStatus: PenaltyStatusDto?,
+    val userRole: String?
 )

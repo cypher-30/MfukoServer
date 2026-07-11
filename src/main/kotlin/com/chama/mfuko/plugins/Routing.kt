@@ -16,6 +16,7 @@ import io.ktor.server.routing.*
 import org.jetbrains.exposed.sql.*
 import org.mindrot.jbcrypt.BCrypt
 import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -91,7 +92,6 @@ fun Application.configureRouting() {
             }
         }
 
-        // ✅ UPDATED ROUTE BLOCK
         route("/api/nests") {
             authenticate("auth-jwt") {
                 post("/create") {
@@ -105,8 +105,10 @@ fun Application.configureRouting() {
                     val newNestId = dbQuery {
                         NestsTable.insertAndGetId {
                             it[name] = request.name
-                            it[contributionAmount] = request.contributionAmount.toBigDecimal()
-                            it[NestsTable.inviteCode] = inviteCode
+                            it[joinCode] = inviteCode
+                            it[managerId] = userId
+                            it[configuration] = ""
+                            it[createdAt] = Instant.now()
                         }
                     }
 
@@ -116,14 +118,16 @@ fun Application.configureRouting() {
                             it[MembershipsTable.userId] = userId
                             it[nestId] = newNestId.value
                             it[role] = "manager"
+                            it[createdAt] = Instant.now()
                         }
                     }
 
                     // Create the very first contribution cycle for the new nest
-                    val currentDate = LocalDateTime.now()
+                    val currentDate = LocalDate.now()
                     dbQuery {
                         CyclesTable.insert {
                             it[nestId] = newNestId.value
+                            it[name] = "Cycle 1"
                             it[startDate] = currentDate
                             it[endDate] = currentDate.plusMonths(1) // Cycle ends in 1 month
                             it[amountDuePerMember] = request.contributionAmount.toBigDecimal()
@@ -140,7 +144,7 @@ fun Application.configureRouting() {
                     val request = call.receive<JoinNestRequest>()
 
                     val nest = dbQuery {
-                        NestsTable.selectAll().where { NestsTable.inviteCode eq request.inviteCode }.singleOrNull()
+                        NestsTable.selectAll().where { NestsTable.joinCode eq request.inviteCode }.singleOrNull()
                     }
 
                     if (nest == null) {
@@ -166,6 +170,7 @@ fun Application.configureRouting() {
                             it[MembershipsTable.userId] = userId
                             it[MembershipsTable.nestId] = nestId
                             it[role] = "member"
+                            it[createdAt] = Instant.now()
                         }
                     }
 
@@ -270,7 +275,8 @@ fun Application.configureRouting() {
                                 it[ContributionsTable.userId] = request.userId
                                 it[ContributionsTable.cycleId] = cycleId
                                 it[amountPaid] = request.amount.toBigDecimal()
-                                it[datePaid] = LocalDateTime.now()
+                                it[status] = "paid"
+                                it[paidAt] = LocalDateTime.now()
                             }
                         } else {
                             // Update the existing record by adding the new amount
@@ -279,7 +285,8 @@ fun Application.configureRouting() {
                                 (ContributionsTable.cycleId eq cycleId) and (ContributionsTable.userId eq request.userId)
                             }) {
                                 it[amountPaid] = currentAmount + request.amount.toBigDecimal()
-                                it[datePaid] = LocalDateTime.now()
+                                it[status] = "paid"
+                                it[paidAt] = LocalDateTime.now()
                             }
                         }
                     }
@@ -485,14 +492,19 @@ fun Application.configureRouting() {
                 get("/dashboard") {
                     val principal = call.principal<JWTPrincipal>()
                     val userId = principal!!.payload.getClaim("userId").asLong()
+                    // A user may belong to more than one nest; the dashboard reflects the
+                    // most recently joined/created one (matches the client's local
+                    // "current nest" cache, which always holds the latest create/join).
                     val membership = dbQuery {
-                        MembershipsTable.selectAll().where { MembershipsTable.userId eq userId }.singleOrNull()
+                        MembershipsTable.selectAll().where { MembershipsTable.userId eq userId }
+                            .orderBy(MembershipsTable.createdAt, SortOrder.DESC).limit(1).singleOrNull()
                     }
                     if (membership == null) {
-                        call.respond(HttpStatusCode.OK, DashboardResponse(null, null, null))
+                        call.respond(HttpStatusCode.OK, DashboardResponse(null, null, null, null))
                         return@get
                     }
                     val nestId = membership[MembershipsTable.nestId]
+                    val userRole = membership[MembershipsTable.role]
 
                     val contributionStatus = dbQuery {
                         val openCycle = CyclesTable.selectAll()
@@ -539,7 +551,8 @@ fun Application.configureRouting() {
                     val dashboardResponse = DashboardResponse(
                         contributionStatus = contributionStatus,
                         loanStatus = loanStatus,
-                        penaltyStatus = penaltyStatus
+                        penaltyStatus = penaltyStatus,
+                        userRole = userRole
                     )
                     call.respond(HttpStatusCode.OK, dashboardResponse)
                 }
